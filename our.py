@@ -1,6 +1,6 @@
 count = -1
 mdb = dict()
-
+win = 10
 
 def ts():
 	global count
@@ -50,6 +50,7 @@ def write(it, trans):
 			temp['r'] = temp['w'] = trans[1]
 			temp['t'] = trans[0]
 			mdb[it].append(temp)
+			mdb[it] = mdb[it][-win : ]
 			# Successful
 			return 0
 	# Abort
@@ -75,16 +76,6 @@ def rollback(t):
 # W : 1
 # C : 3
 
-table = list(
-[
-	[(1, 1), (-1, -1), (0, 1), (-1, -1)],
-	[(2, -1), (0, 1), (-1, -1), (-1, -1)],
-	[(-1, -1), (-1, -1), (-1, -1), (1, 1)],
-	[(-1, -1), (-1, -1), (1, 1), (2, -1)],
-	[(-1, -1), (1, 1), (2, -1), (-1, -1)],
-	[(-1, -1), (2, -1), (-1, -1), (-1, -1)],
-])
-
 transaction_orders = list([0, 1, 2, 3])
 transaction_order = [i for i in range(len(transaction_orders))]
 transaction_timestamps = generate_timestamps(transaction_order)
@@ -93,6 +84,15 @@ transaction_timestamps = generate_timestamps(transaction_order)
 # transaction_finish_order_wait = list([])
 # # Wait
 # # Transactions with lesser timestamps must finish first
+# table = list(
+# [
+# 	[(1, 1), (-1, -1), (0, 1), (-1, -1)],
+# 	[(2, -1), (0, 1), (-1, -1), (-1, -1)],
+# 	[(-1, -1), (-1, -1), (-1, -1), (1, 1)],
+# 	[(-1, -1), (-1, -1), (1, 1), (2, -1)],
+# 	[(-1, -1), (1, 1), (2, -1), (-1, -1)],
+# 	[(-1, -1), (2, -1), (-1, -1), (-1, -1)],
+# ])
 # waiting_queue = []
 # for t in transaction_order:
 # 	for row in range(len(table)-1):
@@ -119,7 +119,7 @@ transaction_timestamps = generate_timestamps(transaction_order)
 # 					if table[row + 1][t][0] == 2 and t not in transaction_finish_order_wait:
 # 						transaction_finish_order_wait.append(t)
 # print(transaction_finish_order_wait)
-
+#
 # ####################################################
 # #
 # # Partial roll back
@@ -188,4 +188,45 @@ transaction_timestamps = generate_timestamps(transaction_order)
 # 		row += 1
 #
 # print(transaction_finish_order_roll)
+# ####################################################
+# Roll Multi items
+# table_multi = list(
+# [
+# 	[(1, 1), (-1, -1), (0, 1), (-1, -1)],
+# 	[(2, -1), (1, 2), (-1, -1), (-1, -1)],
+# 	[(-1, -1), (0, 1), (1, 2), (1, 1)],
+# 	[(-1, -1), (-1, -1), (1, 1), (2, -1)],
+# 	[(-1, -1), (1, 1), (2, -1), (-1, -1)],
+# 	[(-1, -1), (2, -1), (-1, -1), (-1, -1)],
+# ])
+#
+# transaction_finish_order_wait_multi = list([])
+# # Wait
+# # Transactions with lesser timestamps must finish first
+# waiting_queue = []
+# for t in transaction_order:
+# 	for row in range(len(table_multi)-1):
+# 		if table_multi[row][t][0] == 1:
+# 			waiting_queue.append(t)
+# 			break
+#
+# while len(waiting_queue):
+# 	waiting_queue.pop(0)
+# 	for row in range(len(table_multi)-1):
+# 		for t in transaction_order:
+# 			if t not in waiting_queue and t not in transaction_finish_order_wait_multi:
+# 				operation = table_multi[row][t][0]
+# 				item = table_multi[row][t][1]
+# 				if operation == -1 or operation == 2:
+# 					pass
+# 				else:
+# 					if operation == 0:
+# 						read(item, transaction_timestamps[t])
+# 						print("transaction: %d, row: %d, operation: %s, item: %d"%(t, row, "READS", item))
+# 					if operation == 1:
+# 						res = write(item, [t, transaction_timestamps[t]])
+# 						print("transaction: %d, row: %d, operation: %s, item: %d"%(t, row, "WRITES", item))
+# 					if table_multi[row + 1][t][0] == 2 and t not in transaction_finish_order_wait_multi:
+# 						transaction_finish_order_wait_multi.append(t)
+# print(transaction_finish_order_wait_multi)
 # ####################################################
